@@ -1,0 +1,80 @@
+body {
+  width: 275px;
+  padding: 23px 12px 18px 12px;
+  margin: 0px;
+  font-family: "Poppins", sans-serif;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  /* dark mode? */
+  background-color: #282b2d;
+  color: #fafafa;
+  /* light mode */
+  /* color: #121212; */
+}
+
+h2 {
+  margin-top: 0px;
+  margin-bottom: 15px;
+  line-height: 1;
+}
+
+.indicator {
+  height: 5px;
+  border-radius: 3px;
+  background: linear-gradient(90deg, #389afc 70%, white 30%);
+  width: 100%;
+  position: absolute;
+  top: 0;
+  left: 0;
+}
+
+.t-container {
+  line-height: 1;
+  margin-bottom: 10px;
+}
+
+.minutes {
+  font-size: 28px;
+}
+
+.seconds {
+  font-size: 21px;
+}
+
+.t-label {
+  font-weight: 500;
+}
+
+.break-time {
+  color: #919193;
+  font-size: 16px;
+}
+
+.button-container {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 30px;
+  width: 100%;
+}
+
+button {
+  height: 40px;
+  border-radius: 5px;
+  border: none;
+  color: white;
+  cursor: pointer;
+  font-family: "Poppins", sans-serif;
+  font-weight: 500;
+  outline: none;
+  min-width: 135px;
+}
+
+.button-postpone {
+  background-color: #389afc;
+}
+
+.button-disable {
+  background-color: #f15555;
+}
