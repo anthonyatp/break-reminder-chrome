@@ -1,0 +1,49 @@
+.indicator {
+  height: 5px;
+  border-radius: 3px;
+  background: linear-gradient(90deg, #389afc 70%, white 30%);
+  width: 100%;
+  position: absolute;
+  top: 0;
+  left: 0;
+}
+
+.heading {
+  margin-top: 0px;
+  margin-bottom: 15px;
+  line-height: 1;
+}
+
+.t-container {
+  line-height: 1;
+  margin-bottom: 10px;
+}
+
+.minutes {
+  font-size: 28px;
+}
+
+.seconds {
+  font-size: 21px;
+}
+
+.t-label {
+  font-weight: 500;
+}
+
+.break-time {
+  color: #919193;
+  font-size: 16px;
+}
+
+.button-container {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 30px;
+  width: 100%;
+}
+
+.button-stop {
+  background-color: #f15555;
+}

@@ -4,12 +4,14 @@
 <head>
   <link rel="preconnect" href="https://fonts.gstatic.com">
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="styles/base.css">
+  <link rel="stylesheet" href="styles/timer.css">
+  <script defer src="timer.js"></script>
 </head>
 
-<body>
+<body style="padding: 23px 12px 18px 12px;">
   <div class="indicator"></div>
-  <h2>Next break in</h2>
+  <h2 class="heading">Next break in</h2>
   <div class="t-container">
     <a class="minutes">27</a>
     <a class="t-label" style="margin-right: 3px;">M</a>
@@ -18,8 +20,8 @@
   </div>
   <a class="break-time">14:00</a>
   <div class="button-container">
-    <button class="button-postpone">Postpone (+5m)</button>
-    <button class="button-disable">Disable breaks</button>
+    <button>Delay (5min)</button>
+    <button class="button-stop">Stop</button>
   </div>
 </body>
 
