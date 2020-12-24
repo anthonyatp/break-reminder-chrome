@@ -1,35 +1,122 @@
-chrome.storage.sync.get(["breaksStarted", "schedule"], (r) =>
-  alert(JSON.stringify(r))
-);
+async function getLocalStorageValue(key) {
+  return new Promise((resolve, reject) => {
+    try {
+      chrome.storage.sync.get(key, function (value) {
+        resolve(value);
+      });
+    } catch (ex) {
+      reject(ex);
+    }
+  });
+}
 
-const timer = () => {
-  const now = new Date().getTime();
-  const addTimeValue = 1 * 1000 * 60 * 60; // 1 Hour (*1000ms*60s*60m)
-  const rawBreakTime = new Date(now + addTimeValue);
-  // const breakTime = rawBreakTime.toLocaleTimeString()
-  const breakTime = `${rawBreakTime.getHours()}:${rawBreakTime.getMinutes()}`;
-  document.querySelector(".break-time").textContent = breakTime;
-  // let diff = breakTime - now;
-  // if (diff < 0) {
-  //   document.querySelector(".alert").style.display = "block";
-  //   document.querySelector(".container").style.display = "none";
-  // }
+function getTimeMultiplier(unit) {
+  const timeUnitValues = {
+    seconds: 1000,
+    minutes: 1000 * 60,
+    hours: 1000 * 60 * 60,
+  };
 
-  // let days = Math.floor(diff / (1000 * 60 * 60 * 24));
-  // let hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-  // let minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-  // let seconds = Math.floor((diff % (1000 * 60)) / 1000);
+  return timeUnitValues[unit];
+}
 
-  // days <= 99 ? (days = `0${days}`) : days;
-  // days <= 9 ? (days = `00${days}`) : days;
-  // hours <= 9 ? (hours = `0${hours}`) : hours;
-  // minutes <= 9 ? (minutes = `0${minutes}`) : minutes;
-  // seconds <= 9 ? (seconds = `0${seconds}`) : seconds;
+function init() {
+  addMessageListeners();
+  timer();
+}
 
-  // document.querySelector("#days").textContent = days;
-  // document.querySelector("#hours").textContent = hours;
-  // document.querySelector("#minutes").textContent = minutes;
-  // document.querySelector("#seconds").textContent = seconds;
-};
-// timer();
-// setInterval(timer, 1000);
+async function timer() {
+  const data = await getLocalStorageValue([
+    "workStarted",
+    "schedule",
+    "timerRunning",
+  ]);
+
+  const startTime = new Date(data["workStarted"]);
+  const workValue = parseInt(data["schedule"]["workValue"], 10);
+  const breakValue = parseInt(data["schedule"]["breakValue"], 10);
+  const workTimeMultiplier = getTimeMultiplier(data["schedule"]["workUnit"]);
+  const breakTimeMultiplier = getTimeMultiplier(data["schedule"]["breakUnit"]);
+
+  const endWork = new Date(
+    startTime.getTime() + workValue * workTimeMultiplier
+  );
+  const endWorkHours = endWork.getHours();
+  const endWorkMins =
+    endWork.getMinutes().toString().length > 1
+      ? endWork.getMinutes()
+      : `0${endWork.getMinutes()}`;
+
+  const endBreak = new Date(
+    endWork.getTime() + breakValue * breakTimeMultiplier
+  );
+
+  const endWorkFormatted = `${endWorkHours}:${endWorkMins}`;
+
+  // set the break time
+  document.querySelector(".break-time")
+    ? (document.querySelector(".break-time").textContent = endWorkFormatted)
+    : null;
+
+  if (!data["timerRunning"]) {
+    chrome.runtime.sendMessage({
+      command: "startTimer",
+      endTime: endWork,
+    });
+  }
+}
+
+function addMessageListeners() {
+  const stopBtn = document.getElementById("button-stop");
+  const delayBtn = document.getElementById("button-delay");
+
+  if (stopBtn) {
+    stopBtn.addEventListener("click", handleTimerStop);
+  }
+  if (delayBtn) {
+    delayBtn.addEventListener("click", handleTimerDelay);
+  }
+
+  chrome.runtime.onMessage.addListener((request, sendResponse) => {
+    if (request.command === "updateTime") {
+      document.querySelector(".hours").textContent = request.h;
+      document.querySelector(".minutes").textContent = request.m;
+      document.querySelector(".seconds").textContent = request.s;
+
+      const remainingPerc = request.remainingPerc;
+      const elapsedPerc = 100 - remainingPerc;
+
+      const indicatorRemaining = document.getElementById("indicator-remaining");
+      const indicatorElapsed = document.getElementById("indicator-elapsed");
+
+      indicatorRemaining.style.width = `${remainingPerc}%`;
+      indicatorElapsed.style.width = `${elapsedPerc}%`;
+    }
+  });
+}
+
+function handleTimerStop() {
+  chrome.runtime.sendMessage({
+    command: "stopTimer",
+  });
+  chrome.storage.sync.set({ timerRunning: false });
+  chrome.browserAction.setPopup({ popup: "popup/menu.html" });
+  window.location.href = "menu.html";
+}
+
+async function handleTimerDelay() {
+  const delayTime = 5 * 1000 * 60; // 5 mins
+  const data = await getLocalStorageValue(["workStarted"]);
+
+  const workStarted = new Date(data["workStarted"]);
+  const newWorkStarted = new Date(workStarted.getTime() + delayTime);
+
+  chrome.storage.sync.set({ workStarted: newWorkStarted.getTime() });
+  chrome.storage.sync.set({ timerRunning: false });
+  chrome.runtime.sendMessage({
+    command: "stopTimer",
+  });
+  timer();
+}
+
+document.addEventListener("DOMContentLoaded", init);

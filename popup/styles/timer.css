@@ -1,11 +1,24 @@
-.indicator {
-  height: 5px;
-  border-radius: 3px;
-  background: linear-gradient(90deg, #389afc 70%, white 30%);
-  width: 100%;
+.indicator-container {
   position: absolute;
   top: 0;
+}
+
+.indicator-remaining {
+  height: 5px;
+  background-color: #389afc;
+  width: 100%;
+  position: fixed;
   left: 0;
+  transition: width 0.25s;
+}
+
+.indicator-elapsed {
+  height: 5px;
+  background-color: white;
+  width: 0%;
+  position: fixed;
+  right: 0;
+  transition: width 0.25s;
 }
 
 .heading {
@@ -17,6 +30,10 @@
 .t-container {
   line-height: 1;
   margin-bottom: 10px;
+}
+
+.hours {
+  font-size: 28px;
 }
 
 .minutes {

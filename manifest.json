@@ -19,8 +19,8 @@
     "128": "images/icon128.png"
   },
   "background": {
-    "scripts": ["background.js"],
-    "persistent": true
+    "scripts": ["background.js", "popup/timer.js"],
+    "persistent": false
   },
   "content_scripts": [
     {

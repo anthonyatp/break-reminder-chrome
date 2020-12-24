@@ -8,14 +8,17 @@ function startBreaks() {
     breakValue: document.getElementById("breakValue").value,
     breakUnit: document.getElementById("breakUnit").value,
   };
-  chrome.storage.sync.set({ breaksStarted: now, schedule: schedule });
+  chrome.storage.sync.set({
+    workStarted: now,
+    schedule: schedule,
+    timerRunning: false,
+  });
   chrome.browserAction.setPopup({ popup: "popup/timer.html" });
   window.location.href = "timer.html";
 }
 
 // limit value between 1-99
 document.querySelector("input").addEventListener("keydown", function (e) {
-  console.log(e.target.value);
   if (
     parseInt(e.target.value, 10) < 1 ||
     parseInt(e.target.value, 10) > 99 ||
@@ -25,7 +28,6 @@ document.querySelector("input").addEventListener("keydown", function (e) {
   }
 });
 document.querySelector("input").addEventListener("keyup", function (e) {
-  console.log(e.target.value);
   if (
     parseInt(e.target.value, 10) < 1 ||
     parseInt(e.target.value, 10) > 99 ||
