@@ -60,7 +60,7 @@ function startTimer(endTime, type) {
         });
       } else if (type === "break") {
         clearInterval(timer);
-        chrome.tabs.query({ title: "Time for a break" }, (tab) => {
+        chrome.tabs.query({ title: "Time for a break!" }, (tab) => {
           if (Object.keys(tab).length > 0) {
             chrome.tabs.remove(tab[0].id);
           }

@@ -25,7 +25,7 @@ function stopTimer() {
   chrome.runtime.sendMessage({
     command: "stopTimer",
   });
-  chrome.tabs.query({ title: "Time for a break" }, (tab) => {
+  chrome.tabs.query({ title: "Time for a break!" }, (tab) => {
     if (Object.keys(tab).length > 0) {
       chrome.tabs.remove(tab[0].id);
     }
