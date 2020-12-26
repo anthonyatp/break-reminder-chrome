@@ -1,0 +1,35 @@
+.button-container {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 30px;
+  width: 300px;
+}
+
+.t-container {
+    line-height: 1;
+    margin-bottom: 20px;
+}
+
+.heading {
+  margin-top: 50px;
+  margin-bottom: 25px;
+  line-height: 1;
+}
+
+.hours {
+  font-size: 33px;
+}
+
+.minutes {
+  font-size: 33px;
+}
+
+.seconds {
+  font-size: 26px;
+}
+
+.end-time {
+  color: #919193;
+  font-size: 21px;
+}

@@ -9,12 +9,12 @@ function startBreaks() {
     breakUnit: document.getElementById("breakUnit").value,
   };
   chrome.storage.sync.set({
-    workStarted: now,
+    timerStarted: now,
     schedule: schedule,
     timerRunning: false,
   });
-  chrome.browserAction.setPopup({ popup: "popup/timer.html" });
-  window.location.href = "timer.html";
+  chrome.browserAction.setPopup({ popup: "popup/popup-work.html" });
+  window.location.href = "popup-work.html";
 }
 
 // limit value between 1-99
@@ -45,6 +45,13 @@ document.querySelector("input").addEventListener("keypress", function (e) {
     (e.key === "." && contains(e.target.value, "."));
   invalidKey && e.preventDefault();
 });
+
+document.querySelector(".helpText").addEventListener("click", () =>
+  chrome.tabs.create({
+    url:
+      "https://www.ihasco.co.uk/blog/entry/189/it-health-and-safety-how-often-should-i-take-a-break-from-my-computer",
+  })
+);
 
 function contains(stringValue, charValue) {
   return stringValue.indexOf(charValue) > -1;

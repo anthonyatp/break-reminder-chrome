@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <link rel="preconnect" href="https://fonts.gstatic.com">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles/base.css">
+  <link rel="stylesheet" href="styles/timer.css">
+  <script src="timer.js"></script>
+</head>
+
+<body style="padding: 23px 12px 18px 12px;">
+  <div class="indicator-container">
+    <div id="indicator-remaining" class="indicator-remaining"></div>
+    <div id="indicator-elapsed" class="indicator-elapsed"></div>
+  </div>
+  <h2 class="heading">Next break in</h2>
+  <div class="t-container">
+    <a class="hours"> </a>
+    <a id="h-label" class="t-label" style="margin-right: 3px;">H</a>
+    <a class="minutes"> </a>
+    <a id="m-label" class="t-label" style="margin-right: 3px;">M</a>
+    <a class="seconds"> </a>
+    <a id="s-label" class="t-label">S</a>
+  </div>
+  <a class="end-time"></a>
+  <div class="button-container">
+    <button id="button-delay">Delay (5min)</button>
+    <button id="button-stop" class="button-stop" href="popup-menu.html">Stop</button>
+  </div>
+</body>
+
+</html>

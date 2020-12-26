@@ -1,3 +1,4 @@
+/* utils */
 async function getLocalStorageValue(key) {
   return new Promise((resolve, reject) => {
     try {
@@ -20,23 +21,38 @@ function getTimeMultiplier(unit) {
   return timeUnitValues[unit];
 }
 
+function stopTimer() {
+  chrome.runtime.sendMessage({
+    command: "stopTimer",
+  });
+  chrome.tabs.query({ title: "Time for a break" }, (tab) => {
+    if (Object.keys(tab).length > 0) {
+      chrome.tabs.remove(tab[0].id);
+    }
+  });
+}
+
+function setPopup(type) {
+  chrome.browserAction.setPopup({ popup: `popup/popup-${type}.html` });
+  window.location.href = `popup-${type}.html`;
+}
+/* utils */
+
 function init() {
   addMessageListeners();
   timer();
 }
 
-async function timer() {
+async function timer(type = "work") {
   const data = await getLocalStorageValue([
-    "workStarted",
+    "timerStarted",
     "schedule",
     "timerRunning",
   ]);
 
-  const startTime = new Date(data["workStarted"]);
+  const startTime = new Date(data["timerStarted"]);
   const workValue = parseInt(data["schedule"]["workValue"], 10);
-  const breakValue = parseInt(data["schedule"]["breakValue"], 10);
   const workTimeMultiplier = getTimeMultiplier(data["schedule"]["workUnit"]);
-  const breakTimeMultiplier = getTimeMultiplier(data["schedule"]["breakUnit"]);
 
   const endWork = new Date(
     startTime.getTime() + workValue * workTimeMultiplier
@@ -47,21 +63,18 @@ async function timer() {
       ? endWork.getMinutes()
       : `0${endWork.getMinutes()}`;
 
-  const endBreak = new Date(
-    endWork.getTime() + breakValue * breakTimeMultiplier
-  );
-
   const endWorkFormatted = `${endWorkHours}:${endWorkMins}`;
 
   // set the break time
-  document.querySelector(".break-time")
-    ? (document.querySelector(".break-time").textContent = endWorkFormatted)
+  document.querySelector(".end-time")
+    ? (document.querySelector(".end-time").textContent = endWorkFormatted)
     : null;
 
   if (!data["timerRunning"]) {
     chrome.runtime.sendMessage({
       command: "startTimer",
       endTime: endWork,
+      type: type,
     });
   }
 }
@@ -69,12 +82,20 @@ async function timer() {
 function addMessageListeners() {
   const stopBtn = document.getElementById("button-stop");
   const delayBtn = document.getElementById("button-delay");
+  const extendBtn = document.getElementById("button-extend");
+  const skipBtn = document.getElementById("button-skip");
 
   if (stopBtn) {
     stopBtn.addEventListener("click", handleTimerStop);
   }
   if (delayBtn) {
     delayBtn.addEventListener("click", handleTimerDelay);
+  }
+  if (extendBtn) {
+    extendBtn.addEventListener("click", handleTimerExtend);
+  }
+  if (skipBtn) {
+    skipBtn.addEventListener("click", handleTimerSkip);
   }
 
   chrome.runtime.onMessage.addListener((request, sendResponse) => {
@@ -96,27 +117,53 @@ function addMessageListeners() {
 }
 
 function handleTimerStop() {
-  chrome.runtime.sendMessage({
-    command: "stopTimer",
-  });
+  stopTimer();
   chrome.storage.sync.set({ timerRunning: false });
-  chrome.browserAction.setPopup({ popup: "popup/menu.html" });
-  window.location.href = "menu.html";
+  setPopup("menu");
 }
 
 async function handleTimerDelay() {
   const delayTime = 5 * 1000 * 60; // 5 mins
-  const data = await getLocalStorageValue(["workStarted"]);
+  const data = await getLocalStorageValue(["timerStarted"]);
 
-  const workStarted = new Date(data["workStarted"]);
-  const newWorkStarted = new Date(workStarted.getTime() + delayTime);
+  const timerStarted = new Date(data["timerStarted"]);
+  const newtimerStarted = new Date(timerStarted.getTime() + delayTime);
 
-  chrome.storage.sync.set({ workStarted: newWorkStarted.getTime() });
-  chrome.storage.sync.set({ timerRunning: false });
+  chrome.storage.sync.set({
+    timerStarted: newtimerStarted.getTime(),
+    timerRunning: false,
+  });
+  stopTimer();
+  timer("work");
+}
+
+async function handleTimerExtend() {
+  const delayTime = 5 * 1000 * 60; // 5 mins
+  const data = await getLocalStorageValue(["timerStarted"]);
+
+  const timerStarted = new Date(data["timerStarted"]);
+  const newtimerStarted = new Date(timerStarted.getTime() + delayTime);
+
+  chrome.storage.sync.set({
+    timerStarted: newtimerStarted.getTime(),
+    timerRunning: false,
+  });
   chrome.runtime.sendMessage({
     command: "stopTimer",
   });
-  timer();
+  timer("break");
+}
+
+async function handleTimerSkip() {
+  const newtimerStarted = new Date();
+
+  chrome.storage.sync.set({
+    timerStarted: newtimerStarted.getTime(),
+    timerRunning: false,
+  });
+  stopTimer();
+  setPopup("work");
+  timer("work");
 }
 
 document.addEventListener("DOMContentLoaded", init);

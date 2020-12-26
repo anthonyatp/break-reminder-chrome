@@ -1,10 +1,20 @@
 chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
   if (request.command == "startTimer") {
-    startTimer(request.endTime);
+    startTimer(request.endTime, request.type);
   }
 });
 
-function startTimer(endTime) {
+function getTimeMultiplier(unit) {
+  const timeUnitValues = {
+    seconds: 1000,
+    minutes: 1000 * 60,
+    hours: 1000 * 60 * 60,
+  };
+
+  return timeUnitValues[unit];
+}
+
+function startTimer(endTime, type) {
   chrome.runtime.onMessage.addListener((request) => {
     if (request.command == "stopTimer") {
       clearInterval(timer);
@@ -29,9 +39,48 @@ function startTimer(endTime) {
 
       updateTime(initDiff, diff, diffHours, diffMinutes, diffSeconds);
     } else {
-      // TODO: implement breaks (new tab? replace other tabs?)
-      chrome.tabs.create({ url: "popup/break.html" });
-      clearInterval(timer);
+      const chime = new Audio(chrome.runtime.getURL("audio/chime.mp3"));
+      if (type === "work") {
+        clearInterval(timer);
+        chrome.tabs.create({ url: "popup/break.html" });
+        chrome.storage.sync.get(["schedule"], (result) => {
+          const breakValue = parseInt(result["schedule"]["breakValue"], 10);
+          const breakTimeMultiplier = getTimeMultiplier(
+            result["schedule"]["breakUnit"]
+          );
+          const newEndTime = new Date(
+            new Date(endTime).getTime() + breakValue * breakTimeMultiplier
+          );
+
+          chrome.storage.sync.set({ timerStarted: newEndTime.getTime() });
+
+          setPopup("break");
+          startTimer(newEndTime, "break");
+          chime.play();
+        });
+      } else if (type === "break") {
+        clearInterval(timer);
+        chrome.tabs.query({ title: "Time for a break" }, (tab) => {
+          if (Object.keys(tab).length > 0) {
+            chrome.tabs.remove(tab[0].id);
+          }
+        });
+        chrome.storage.sync.get(["schedule"], (result) => {
+          const workValue = parseInt(result["schedule"]["workValue"], 10);
+          const workTimeMultiplier = getTimeMultiplier(
+            result["schedule"]["workUnit"]
+          );
+          const newEndTime = new Date(
+            new Date(endTime).getTime() + workValue * workTimeMultiplier
+          );
+
+          chrome.storage.sync.set({ timerStarted: newEndTime.getTime() });
+
+          setPopup("work");
+          startTimer(newEndTime, "work");
+          chime.play();
+        });
+      }
     }
   }, 1000);
 }
@@ -47,4 +96,9 @@ function updateTime(initDiff, currentDiff, h, m, s) {
     m: m,
     s: s,
   });
+}
+
+function setPopup(type) {
+  chrome.browserAction.setPopup({ popup: `popup/popup-${type}.html` });
+  window.location.href = `popup-${type}.html`;
 }
